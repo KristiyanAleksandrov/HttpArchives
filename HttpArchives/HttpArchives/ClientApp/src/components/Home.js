@@ -5,6 +5,8 @@ import {
     processTreeViewItems,
     handleTreeViewCheckChange,
 } from "@progress/kendo-react-treeview";
+import { NetworkViewer } from 'network-viewer';
+
 const tree = [
     {
         text: "Furniture",
@@ -76,19 +78,25 @@ const Home = () => {
     };
 
     return (
+        <div>
         <TreeView
-            data={processTreeViewItems(tree, {
-                select: select,
-                check: check,
-                expand: expand,
-            })}
-            expandIcons={true}
-            onExpandChange={onExpandChange}
-            aria-multiselectable={true}
-            onItemClick={onItemClick}
-            checkboxes={true}
-            onCheckChange={onCheckChange}
-        />
+                data={processTreeViewItems(tree, {
+                    //select: select,
+                    check: check,
+                    expand: expand,
+                })}
+                expandIcons={true}
+                onExpandChange={onExpandChange}
+                aria-multiselectable={true}
+                onItemClick={onItemClick}
+                checkboxes={true}
+                onCheckChange={onCheckChange}
+            />
+            <hr />
+            <NetworkViewer
+                isCORSEnabled={true}
+            />
+        </div>
     );
 };
 
