@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as ReactDOM from "react-dom";
 import {
     TreeView,
@@ -6,6 +6,7 @@ import {
     handleTreeViewCheckChange,
 } from "@progress/kendo-react-treeview";
 import { NetworkViewer } from 'network-viewer';
+
 
 const tree = [
     {
@@ -41,6 +42,26 @@ const tree = [
             },
             {
                 text: "Carpets",
+                items: [
+                    {
+                        text: "test1.har",
+                        check: false
+                    },
+                    {
+                        text: "test2.har",
+                        check: true
+                    },
+                    {
+                        text: "test3.har",
+                        check: false
+                    },
+                    {
+                        text: "mockup.jpg",
+                    },
+                    {
+                        text: "Research.pdf",
+                    },
+                ],
             },
         ],
     },
@@ -93,9 +114,7 @@ const Home = () => {
                 onCheckChange={onCheckChange}
             />
             <hr />
-            <NetworkViewer
-                isCORSEnabled={true}
-            />
+            <NetworkViewer />
         </div>
     );
 };
