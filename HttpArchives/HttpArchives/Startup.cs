@@ -1,5 +1,6 @@
 using HttpArchives.Data;
 using HttpArchives.Models;
+using HttpArchives.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -49,6 +50,8 @@ namespace HttpArchives
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddTransient<IHarFileService, HarFileService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

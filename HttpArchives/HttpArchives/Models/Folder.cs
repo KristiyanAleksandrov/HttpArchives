@@ -10,7 +10,9 @@ namespace HttpArchives.Models
         [MaxLength(100)]
         public string Name { get; set; }
 
-        public int ParentId { get; set; }
+        public Folder Parent { get; set; }
+
+        public IEnumerable<Folder> Children { get; set; }
 
         public IEnumerable<HarFile> HarFiles { get; set; }
     }
