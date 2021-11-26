@@ -73,6 +73,7 @@ const Home = () => {
     const [fileData, setFileData] = useState({});
     const [fileName, setFileName] = useState("");
     const [fileDescription, setDescription] = useState("");
+    const [selectedFolder, setSelectedFolder] = useState("");
 
     const dragClue = React.useRef();
     const dragOverCnt = React.useRef(0);
@@ -92,12 +93,12 @@ const Home = () => {
     const getHarFileData = (e) => {
         e.preventDefault();
         if (fileRef.current.files.length == 0) {
-            alert("Choose HAR file please");
+            alert("Choose HAR file please.");
             return;
         }
         let file = fileRef.current.files[0];
         if (!file.name.toLowerCase().endsWith(".har")) {
-            alert("This is not a HAR file");
+            alert("This is not a HAR file.");
             return;
         }
         if (file) {
@@ -148,6 +149,7 @@ const Home = () => {
             return;
         }
         if (!isDragDrop.current) {
+            setSelectedFolder(event.item.text);
             setSelect([event.itemHierarchicalIndex]);
         }
     };
@@ -201,11 +203,15 @@ const Home = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!fileName) {
-            alert("Fill name field before save HAR file");
+            alert("Fill name field before save HAR file.");
             return;
         }
         if (!fileDescription) {
-            alert("Fill description field before save HAR file");
+            alert("Fill description field before save HAR file.");
+            return;
+        }
+        if (!selectedFolder) {
+            alert("Select folder please.");
             return;
         }
         let fileData = await getHarFileData(e);
@@ -215,7 +221,12 @@ const Home = () => {
                 'Accept': 'application/json; charset=utf-8',
                 'Content-Type': 'application/json;charset=UTF-8'
             },
-            body: JSON.stringify({ name: fileName, content: JSON.stringify(fileData), description: fileDescription })
+            body: JSON.stringify({
+                name: fileName.toLocaleLowerCase().endsWith(".har") ? fileName : fileName + ".har",
+                content: JSON.stringify(fileData),
+                description: fileDescription,
+                folderName: selectedFolder
+            })
         }).then(res => res.json())
             .then((id) => {
 
@@ -225,9 +236,11 @@ const Home = () => {
     const handleChangeDescription = (e) => {
         setDescription(e.target.value);
     }
+
     const handleChangeName = (e) => {
         setFileName(e.target.value);
     }
+
     return (
         <div>
             <div id="files">
