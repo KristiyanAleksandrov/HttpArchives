@@ -14,8 +14,7 @@ namespace HttpArchives.Models
         [MaxLength(500)]
         public string Description { get; set; }
 
-        public int FolderId { get; set; }
-
-        public Folder Folder { get; set; }
+        [MaxLength(100)]
+        public string FolderName { get; set; }
     }
 }
