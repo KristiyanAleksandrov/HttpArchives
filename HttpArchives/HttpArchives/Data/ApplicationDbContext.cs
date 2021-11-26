@@ -12,8 +12,6 @@ namespace HttpArchives.Data
 {
     public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     {
-        public DbSet<Folder> Folders { get; set; }
-
         public DbSet<HarFile> HarFiles { get; set; }
 
         public ApplicationDbContext(

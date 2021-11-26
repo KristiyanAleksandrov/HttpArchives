@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace HttpArchives.Data.Migrations
+namespace HttpArchives.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211125222332_addDescription")]
-    partial class addDescription
+    [Migration("20211126223433_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -86,27 +86,6 @@ namespace HttpArchives.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("HttpArchives.Models.Folder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentId");
-
-                    b.ToTable("Folders");
-                });
-
             modelBuilder.Entity("HttpArchives.Models.HarFile", b =>
                 {
                     b.Property<int>("Id")
@@ -121,12 +100,15 @@ namespace HttpArchives.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("FolderId")
-                        .HasColumnType("int");
+                    b.Property<string>("FolderName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FolderId");
 
                     b.ToTable("HarFiles");
                 });
@@ -369,26 +351,6 @@ namespace HttpArchives.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("HttpArchives.Models.Folder", b =>
-                {
-                    b.HasOne("HttpArchives.Models.Folder", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId");
-
-                    b.Navigation("Parent");
-                });
-
-            modelBuilder.Entity("HttpArchives.Models.HarFile", b =>
-                {
-                    b.HasOne("HttpArchives.Models.Folder", "Folder")
-                        .WithMany("HarFiles")
-                        .HasForeignKey("FolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Folder");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -438,13 +400,6 @@ namespace HttpArchives.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("HttpArchives.Models.Folder", b =>
-                {
-                    b.Navigation("Children");
-
-                    b.Navigation("HarFiles");
                 });
 #pragma warning restore 612, 618
         }
