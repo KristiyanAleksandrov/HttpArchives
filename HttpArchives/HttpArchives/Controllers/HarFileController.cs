@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace HttpArchives.Controllers
 {
+    [Route("api/[controller]/[action]")]
+    [ApiController]
     public class HarFileController : ControllerBase
     {
         private readonly IHarFileService harFileService;
@@ -14,9 +16,17 @@ namespace HttpArchives.Controllers
         }
 
         [HttpPost]
-        public async Task Create(string content, string description)
+        public async Task Create([FromBody] HarFileInputModel input)
         {
-            await harFileService.CreateHarFileAsync(content, description);
+            await harFileService.CreateHarFileAsync(input.Name, input.Content, input.Description);
         }
+    }
+    public class HarFileInputModel
+    {
+        public string Name { get; set; }
+
+        public string Content { get; set; }
+
+        public string Description { get; set; }
     }
 }

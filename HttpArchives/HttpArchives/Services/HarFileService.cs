@@ -12,10 +12,11 @@ namespace HttpArchives.Services
         {
             this.db = applicationDbContext;
         }
-        public async Task<int> CreateHarFileAsync(string content, string description)
+        public async Task<int> CreateHarFileAsync(string fileName, string content, string description)
         {
             var harFile = new HarFile()
             {
+                Name = fileName,
                 Content = content,
                 Description = description
             };

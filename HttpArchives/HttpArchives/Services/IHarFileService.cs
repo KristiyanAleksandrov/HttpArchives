@@ -4,6 +4,6 @@ namespace HttpArchives.Services
 {
     public interface IHarFileService
     {
-        Task<int> CreateHarFileAsync(string content, string description);
+        Task<int> CreateHarFileAsync(string fileName, string content, string description);
     }
 }
