@@ -14,7 +14,7 @@ const treeData = [
         text: "Furniture",
         items: [
             {
-                text: "Tables & Chairs",
+                text: "My Folder",
             },
             {
                 text: "Sofas",
@@ -23,10 +23,10 @@ const treeData = [
                 text: "Occasional Furniture",
                 items: [
                     {
-                        text: "Tables & Chairs",
+                        text: "Test Folder",
                     },
                     {
-                        text: "Tables & Chairs",
+                        text: "Progress",
                     },
                 ]
             },
@@ -46,22 +46,13 @@ const treeData = [
                 items: [
                     {
                         text: "test1.har",
-                        check: false
                     },
                     {
                         text: "test2.har",
-                        check: true
                     },
                     {
                         text: "test3.har",
-                        check: false
-                    },
-                    {
-                        text: "mockup.jpg",
-                    },
-                    {
-                        text: "Research.pdf",
-                    },
+                    }
                 ],
             },
         ],
@@ -80,32 +71,9 @@ function getSiblings(itemIndex, data) {
 const Home = () => {
     const fileRef = useRef();
     const [fileData, setFileData] = useState({});
+    const [fileName, setFileName] = useState("");
+    const [fileDescription, setDescription] = useState("");
 
-    // const [select, setSelect] = useState([""]);
-    // const onItemClick = (event) => {
-    //     setSelect([event.itemHierarchicalIndex]);
-    // };
-
-    const previewFileInNetworkViewer = (e) => {
-        e.preventDefault();
-        let file = fileRef.current.files[0];
-        if (!file.name.toLowerCase().endsWith(".har")) {
-            alert("This is not a HAR file");
-            return;
-        }
-        console.log(file);
-        if (file) {
-            var reader = new FileReader();
-            reader.readAsText(file, "UTF-8");
-            reader.onload = function (evt) {
-                console.log(evt.target.result);
-                setFileData(JSON.parse(evt.target.result));
-            }
-            reader.onerror = function (evt) {
-                console.log("error reading file");
-            }
-        }
-    }
     const dragClue = React.useRef();
     const dragOverCnt = React.useRef(0);
     const isDragDrop = React.useRef(false);
@@ -114,10 +82,37 @@ const Home = () => {
         ids: [],
         idField: "text",
     });
-    const [selected, setSelected] = React.useState({
-        ids: [],
-        idField: "text",
-    });
+
+    const [select, setSelect] = useState([""]);
+
+    const previewFileInNetworkViewer = async (e) => {
+        setFileData(await getHarFileData(e));
+    }
+
+    const getHarFileData = (e) => {
+        e.preventDefault();
+        if (fileRef.current.files.length == 0) {
+            alert("Choose HAR file please");
+            return;
+        }
+        let file = fileRef.current.files[0];
+        if (!file.name.toLowerCase().endsWith(".har")) {
+            alert("This is not a HAR file");
+            return;
+        }
+        if (file) {
+            return new Promise((resolve, reject) => {
+                var reader = new FileReader();
+                reader.readAsText(file, "UTF-8");
+                reader.onload = (evt) => {
+                    resolve(JSON.parse(evt.target.result));
+                }
+                reader.onerror = (evt) => {
+                    reject("error reading file");
+                }
+            });
+        }
+    }
 
     const getClueClassName = (event) => {
         const eventAnalyzer = new TreeViewDragAnalyzer(event).init();
@@ -146,6 +141,15 @@ const Home = () => {
         }
 
         return "k-i-cancel";
+    };
+
+    const onItemClick = (event) => {
+        if (event.item.text.toLowerCase().endsWith(".har")) {
+            return;
+        }
+        if (!isDragDrop.current) {
+            setSelect([event.itemHierarchicalIndex]);
+        }
     };
 
     const onItemDragOver = (event) => {
@@ -184,18 +188,6 @@ const Home = () => {
         }
     };
 
-    const onItemClick = (event) => {
-        if (!isDragDrop.current) {
-            let ids = selected.ids.slice();
-            const index = ids.indexOf(event.item.text);
-            index === -1 ? ids.push(event.item.text) : ids.splice(index, 1);
-            setSelected({
-                ids,
-                idField: "text",
-            });
-        }
-    };
-
     const onExpandChange = (event) => {
         let ids = expand.ids.slice();
         const index = ids.indexOf(event.item.text);
@@ -205,6 +197,37 @@ const Home = () => {
             idField: "text",
         });
     };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!fileName) {
+            alert("Fill name field before save HAR file");
+            return;
+        }
+        if (!fileDescription) {
+            alert("Fill description field before save HAR file");
+            return;
+        }
+        let fileData = await getHarFileData(e);
+        fetch("api/harfile/create", {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json; charset=utf-8',
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: JSON.stringify({ name: fileName, content: JSON.stringify(fileData), description: fileDescription })
+        }).then(res => res.json())
+            .then((id) => {
+
+            })
+    }
+
+    const handleChangeDescription = (e) => {
+        setDescription(e.target.value);
+    }
+    const handleChangeName = (e) => {
+        setFileName(e.target.value);
+    }
     return (
         <div>
             <div id="files">
@@ -215,7 +238,7 @@ const Home = () => {
                         onItemDragEnd={onItemDragEnd}
                         data={processTreeViewItems(tree, {
                             expand: expand,
-                            select: selected,
+                            select: select,
                         })}
                         expandIcons={true}
                         onExpandChange={onExpandChange}
@@ -224,20 +247,22 @@ const Home = () => {
                     <TreeViewDragClue ref={dragClue} />
                 </div>
                 <div id="bloc2">
-                    <form id="saveHar">
+                    <form onSubmit={handleSubmit} id="saveHar">
                         <h1>Save your HAR file</h1>
                         <hr />
-                        <input ref={fileRef} type="file" accept=".HAR" multiple></input>
+                        <input ref={fileRef} type="file" accept=".HAR"></input>
+                        <br />
+                        <input placeholder="Add file name here..." type="text" onChange={handleChangeName}></input>
                     </form>
-                    <textarea placeholder="Add description for your file here..." rows="4" cols="50" name="description" form="saveHar"></textarea>
+                    <textarea placeholder="Add description for your file here..." rows="4" cols="50" form="saveHar" onChange={handleChangeDescription}></textarea>
                     <br />
-                    <button type="button" className="btn btn-secondary" onClick={previewFileInNetworkViewer}>Preview</button>
+                    <button type="button" className="btn btn-secondary" onClick={previewFileInNetworkViewer}>Preview before save</button>
                     <input type="submit" className="btn btn-primary" form="saveHar" value="Save"></input>
                 </div>
             </div>
             <hr />
             <h1 className="previewer">Previewer</h1>
-            <NetworkViewer containerClassName={".width: 100%;"} data={fileData} />
+            <NetworkViewer data={fileData} />
         </div>
     );
 };
