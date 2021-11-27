@@ -9,6 +9,8 @@ import {
 import { NetworkViewer } from 'network-viewer';
 import "./Home.css"
 import { Container } from 'reactstrap';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SEPARATOR = "_";
 const treeData = [
@@ -97,12 +99,12 @@ const Home = () => {
     const getHarFileData = (e) => {
         e.preventDefault();
         if (fileRef.current.files.length == 0) {
-            alert("Choose HAR file please.");
+            toast.error("Choose HAR file please.");
             return;
         }
         let file = fileRef.current.files[0];
         if (!file.name.toLowerCase().endsWith(".har")) {
-            alert("This is not a HAR file.");
+            toast.error("This is not a HAR file.");
             return;
         }
         if (file) {
@@ -215,18 +217,21 @@ const Home = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!fileName.trim()) {
-            alert("Fill name field before save HAR file.");
+            toast.error("Fill Name field please.");
             return;
         }
         if (!fileDescription.trim()) {
-            alert("Fill description field before save HAR file.");
+            toast.error("Fill Description field please.");
             return;
         }
         if (!selectedFolder) {
-            alert("Select folder please.");
+            toast.error("Select folder please.");
             return;
         }
         let fileData = await getHarFileData(e);
+        if(!fileData){
+            return;
+        }
         fetch("api/harfile/create", {
             method: "POST",
             headers: {
@@ -244,7 +249,8 @@ const Home = () => {
                 let newTree = tree;
                 newTree.push({ text: res.name });
                 setTree(newTree);
-                alert("Successfully saved HAR file");
+                document.getElementById("saveHar").reset();
+                toast.success("Successfully saved HAR file");
             })
     }
 
@@ -258,6 +264,7 @@ const Home = () => {
 
     return (
         <div>
+            <ToastContainer/>
             <Container>
             <div id="files">
                 <div id="bloc1">
