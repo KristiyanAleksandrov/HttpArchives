@@ -18,9 +18,13 @@ namespace HttpArchives.Controllers
         }
 
         [HttpPost]
-        public async Task Create([FromBody] HarFileInputModel input)
+        public async Task<HarFileModel> Create([FromBody] HarFileInputModel input)
         {
-            await harFileService.CreateHarFileAsync(input.Name, input.Content, input.Description, input.FolderName);
+            if (!ModelState.IsValid)
+            {
+                return null;
+            }
+            return await harFileService.CreateHarFileAsync(input.Name, input.Content, input.Description, input.FolderName);
         }
 
         [HttpGet]

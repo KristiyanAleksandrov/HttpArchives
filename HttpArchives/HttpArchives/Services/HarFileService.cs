@@ -15,7 +15,7 @@ namespace HttpArchives.Services
         {
             this.db = applicationDbContext;
         }
-        public async Task<int> CreateHarFileAsync(string fileName, string content, string description, string folderName)
+        public async Task<HarFileModel> CreateHarFileAsync(string fileName, string content, string description, string folderName)
         {
             var harFile = new HarFile()
             {
@@ -28,7 +28,11 @@ namespace HttpArchives.Services
             await db.HarFiles.AddAsync(harFile);
             await db.SaveChangesAsync();
 
-            return harFile.Id;
+            return new HarFileModel()
+            {
+                Name = harFile.Name,
+                FolderName = harFile.FolderName
+            };
         }
 
         public IEnumerable<HarFileModel> GetAllHarFiles()
