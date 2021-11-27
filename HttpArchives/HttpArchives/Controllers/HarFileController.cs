@@ -1,5 +1,7 @@
 ﻿using HttpArchives.Services;
+using HttpArchives.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HttpArchives.Controllers
@@ -20,15 +22,17 @@ namespace HttpArchives.Controllers
         {
             await harFileService.CreateHarFileAsync(input.Name, input.Content, input.Description, input.FolderName);
         }
-    }
-    public class HarFileInputModel
-    {
-        public string Name { get; set; }
 
-        public string Content { get; set; }
+        [HttpGet]
+        public IEnumerable<HarFileModel> GetAllHarFiles()
+        {
+            return harFileService.GetAllHarFiles();
+        }
 
-        public string Description { get; set; }
-
-        public string FolderName { get; set; }
+        [HttpGet("{fileName}")]
+        public string GetHarFileContent([FromRoute]string fileName)
+        {
+            return harFileService.GetHarFileContent(fileName);
+        }
     }
 }

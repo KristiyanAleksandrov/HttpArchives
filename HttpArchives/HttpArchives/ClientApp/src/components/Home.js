@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
     TreeView,
     TreeViewDragClue,
@@ -43,17 +43,6 @@ const treeData = [
             },
             {
                 text: "Carpets",
-                items: [
-                    {
-                        text: "test1.har",
-                    },
-                    {
-                        text: "test2.har",
-                    },
-                    {
-                        text: "test3.har",
-                    }
-                ],
             },
         ],
     },
@@ -85,6 +74,20 @@ const Home = () => {
     });
 
     const [select, setSelect] = useState([""]);
+
+    useEffect(() => {
+        setTree(treeData);
+        fetch(`api/harfile/getAllHarFiles`)
+            .then(res => res.json())
+            .then((result) => {
+                result.forEach((harData) => {
+                    var newTree = tree;
+                    newTree.push({ text: harData.name });
+                    setTree(newTree);
+                })
+            },
+            )
+    }, [])
 
     const previewFileInNetworkViewer = async (e) => {
         setFileData(await getHarFileData(e));
@@ -145,11 +148,19 @@ const Home = () => {
     };
 
     const onItemClick = (event) => {
-        if (event.item.text.toLowerCase().endsWith(".har")) {
+        let fileName = event.item.text;
+        if (fileName.toLowerCase().endsWith(".har")) {
+            fetch(`api/harfile/GetHarFileContent/${fileName}`)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    setFileData(result);
+                },
+            );
             return;
         }
         if (!isDragDrop.current) {
-            setSelectedFolder(event.item.text);
+            setSelectedFolder(fileName);
             setSelect([event.itemHierarchicalIndex]);
         }
     };

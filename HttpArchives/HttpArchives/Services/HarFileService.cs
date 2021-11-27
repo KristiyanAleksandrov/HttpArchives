@@ -1,5 +1,8 @@
 ﻿using HttpArchives.Data;
 using HttpArchives.Models;
+using HttpArchives.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HttpArchives.Services
@@ -26,6 +29,25 @@ namespace HttpArchives.Services
             await db.SaveChangesAsync();
 
             return harFile.Id;
+        }
+
+        public IEnumerable<HarFileModel> GetAllHarFiles()
+        {
+            return db.HarFiles.Select(x => new HarFileModel()
+            {
+                Name = x.Name,
+                FolderName = x.FolderName
+            });
+        }
+
+        public string GetHarFileContent(string fileName)
+        {
+            var harFile =  db.HarFiles.FirstOrDefault(x => x.Name == fileName);
+            if (harFile == null)
+            {
+                return null;
+            }
+            return harFile.Content;
         }
     }
 }
