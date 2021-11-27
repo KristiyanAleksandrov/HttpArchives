@@ -8,6 +8,8 @@ import {
 } from "@progress/kendo-react-treeview";
 import { NetworkViewer } from 'network-viewer';
 import "./Home.css"
+import { Container } from 'reactstrap';
+
 const SEPARATOR = "_";
 const treeData = [
     {
@@ -76,12 +78,11 @@ const Home = () => {
     const [select, setSelect] = useState([""]);
 
     useEffect(() => {
-        setTree(treeData);
-        fetch(`api/harfile/getAllHarFiles`)
+            fetch(`api/harfile/getAllHarFiles`)
             .then(res => res.json())
-            .then((result) => {
-                result.forEach((harData) => {
-                    var newTree = tree;
+            .then((res) => {
+                var newTree = treeData;
+                res.forEach((harData) => {
                     newTree.push({ text: harData.name });
                     setTree(newTree);
                 })
@@ -213,11 +214,11 @@ const Home = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!fileName) {
+        if (!fileName.trim()) {
             alert("Fill name field before save HAR file.");
             return;
         }
-        if (!fileDescription) {
+        if (!fileDescription.trim()) {
             alert("Fill description field before save HAR file.");
             return;
         }
@@ -233,14 +234,17 @@ const Home = () => {
                 'Content-Type': 'application/json;charset=UTF-8'
             },
             body: JSON.stringify({
-                name: fileName.toLocaleLowerCase().endsWith(".har") ? fileName : fileName + ".har",
+                name: fileName.toLocaleLowerCase().endsWith(".har") ? fileName.trim() : fileName.trim() + ".har",
                 content: JSON.stringify(fileData),
                 description: fileDescription,
                 folderName: selectedFolder
             })
         }).then(res => res.json())
-            .then((id) => {
-
+            .then((res) => {
+                let newTree = tree;
+                newTree.push({ text: res.name });
+                setTree(newTree);
+                alert("Successfully saved HAR file");
             })
     }
 
@@ -254,6 +258,7 @@ const Home = () => {
 
     return (
         <div>
+            <Container>
             <div id="files">
                 <div id="bloc1">
                     <TreeView
@@ -286,6 +291,7 @@ const Home = () => {
             </div>
             <hr />
             <h1 className="previewer">Previewer</h1>
+            </Container>
             <NetworkViewer data={fileData} />
         </div>
     );
