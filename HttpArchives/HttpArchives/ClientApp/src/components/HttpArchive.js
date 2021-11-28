@@ -43,6 +43,7 @@ const HttpArchive = () => {
 
     const [select, setSelect] = useState([""]);
 
+
     useEffect(() => {
         fetch(`api/harfile/getAllHarFiles`)
             .then(res => res.json())
@@ -53,8 +54,17 @@ const HttpArchive = () => {
             },
             )
 
-            return () => setTree(treeData);
+        return () => setTree(treeData);
     }, [])
+
+    const getItemNameByIndex = (itemIndex, data) => {
+        let test = data;
+        const indices = itemIndex.split("_").map((index) => Number(index));
+        for (let i = 0; i < indices.length - 1; i++) {
+            test = test[indices[i]].items || [];
+        }
+        return test[indices[indices.length - 1]].text;
+    }
 
     const addFileToCorrectFolder = (fileName, folderName, data) => {
         data.forEach((obj) => {
@@ -72,7 +82,6 @@ const HttpArchive = () => {
             }
         })
     }
-
 
     const previewFileInNetworkViewer = async (e) => {
         setFileData(await getHarFileData(e));
@@ -101,6 +110,20 @@ const HttpArchive = () => {
                 }
             });
         }
+    }
+
+    const changeHarFileFolder = (fileName, folderName) => {
+        fetch("api/harfile/changeFileFolder", {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json; charset=utf-8',
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: JSON.stringify({
+                name: fileName.trim(),
+                folderName: folderName
+            })
+        })
     }
 
     const getClueClassName = (event) => {
@@ -174,7 +197,6 @@ const HttpArchive = () => {
         dragOverCnt.current = 0;
         dragClue.current.hide();
         const eventAnalyzer = new TreeViewDragAnalyzer(event).init();
-        console.log(eventAnalyzer);
         if (eventAnalyzer.isDropAllowed) {
             const updatedTree = moveTreeViewItem(
                 event.itemHierarchicalIndex,
@@ -183,6 +205,7 @@ const HttpArchive = () => {
                 eventAnalyzer.destinationMeta.itemHierarchicalIndex
             );
             setTree(updatedTree);
+            changeHarFileFolder(event.item.text, getItemNameByIndex(eventAnalyzer.destinationMeta.itemHierarchicalIndex, tree));
         }
     };
 
@@ -226,14 +249,14 @@ const HttpArchive = () => {
                 description: fileDescription,
                 folderName: selectedFolder
             })
+        }).catch(() => {
+            toast.error("Error while creating har file");
         }).then(res => res.json())
             .then((res) => {
                 document.getElementById("saveHar").reset();
                 toast.success("Successfully saved HAR file");
-                addFileToCorrectFolder(res.name, res.fileName)
-            }).catch(() => {
-                toast.error("Error while creating har file");
-            })
+                addFileToCorrectFolder(res.name, res.folderName, tree);
+            });
     }
 
     const handleChangeDescription = (e) => {

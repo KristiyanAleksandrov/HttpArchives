@@ -46,12 +46,22 @@ namespace HttpArchives.Services
 
         public string GetHarFileContent(string fileName)
         {
-            var harFile =  db.HarFiles.FirstOrDefault(x => x.Name == fileName);
+            var harFile = db.HarFiles.FirstOrDefault(x => x.Name == fileName);
             if (harFile == null)
             {
                 return null;
             }
             return harFile.Content;
+        }
+
+        public async Task ChangeHarFileFolderNameAsync(string fileName, string newFolderName)
+        {
+            var harFile = db.HarFiles.FirstOrDefault(x => x.Name == fileName);
+            if (harFile != null)
+            {
+                harFile.FolderName = newFolderName;
+                await db.SaveChangesAsync();
+            }
         }
     }
 }

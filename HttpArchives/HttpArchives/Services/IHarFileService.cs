@@ -11,5 +11,7 @@ namespace HttpArchives.Services
         IEnumerable<HarFileModel> GetAllHarFiles();
 
         string GetHarFileContent(string fileName);
+
+        Task ChangeHarFileFolderNameAsync(string fileName, string newFolderName);
     }
 }
