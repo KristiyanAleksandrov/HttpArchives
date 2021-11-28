@@ -33,8 +33,10 @@ namespace HttpArchives
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddDefaultIdentity<ApplicationUser>(options => {
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedAccount = false;
+                }).AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddIdentityServer()
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
