@@ -1,11 +1,13 @@
 ﻿using HttpArchives.Services;
 using HttpArchives.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HttpArchives.Controllers
 {
+    [Authorize]
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class HarFileController : ControllerBase
@@ -30,7 +32,7 @@ namespace HttpArchives.Controllers
         }
 
         [HttpGet("{fileName}")]
-        public string GetHarFileContent([FromRoute] string fileName)
+        public HarFileModel GetHarFileContent([FromRoute] string fileName)
         {
             return harFileService.GetHarFileContent(fileName);
         }

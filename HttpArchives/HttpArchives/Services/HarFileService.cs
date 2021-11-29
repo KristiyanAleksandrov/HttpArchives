@@ -44,14 +44,19 @@ namespace HttpArchives.Services
             });
         }
 
-        public string GetHarFileContent(string fileName)
+        public HarFileModel GetHarFileContent(string fileName)
         {
             var harFile = db.HarFiles.FirstOrDefault(x => x.Name == fileName);
             if (harFile == null)
             {
                 return null;
             }
-            return harFile.Content;
+
+            return new HarFileModel()
+            {
+                Description = harFile.Description,
+                Content = harFile.Content
+            };
         }
 
         public async Task ChangeHarFileFolderNameAsync(string fileName, string newFolderName)

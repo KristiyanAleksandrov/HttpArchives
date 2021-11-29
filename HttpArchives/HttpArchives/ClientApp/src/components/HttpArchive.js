@@ -12,6 +12,7 @@ import { Container } from 'reactstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import treeData from "../data/treeData.js"
+import authService from './api-authorization/AuthorizeService'
 
 const SEPARATOR = "_";
 
@@ -32,6 +33,8 @@ const HttpArchive = () => {
     const [fileDescription, setDescription] = useState("");
     const [selectedFolder, setSelectedFolder] = useState("");
 
+    const [previewDescription, setPreviewDescription] = useState("");
+
     const dragClue = React.useRef();
     const dragOverCnt = React.useRef(0);
     const isDragDrop = React.useRef(false);
@@ -45,15 +48,20 @@ const HttpArchive = () => {
 
 
     useEffect(() => {
-        fetch(`api/harfile/getAllHarFiles`)
-            .then(res => res.json())
-            .then((res) => {
-                res.forEach((harData) => {
-                    addFileToCorrectFolder(harData.name, harData.folderName, tree);
-                })
-            },
-            )
-
+        async function fetchMyAPI() {
+            const token = await authService.getAccessToken();
+            fetch(`api/harfile/getAllHarFiles`, {
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then((res) => {
+                    res.forEach((harData) => {
+                        addFileToCorrectFolder(harData.name, harData.folderName, tree);
+                    })
+                },
+                )
+        }
+        fetchMyAPI();
         return () => setTree(treeData);
     }, [])
 
@@ -112,12 +120,14 @@ const HttpArchive = () => {
         }
     }
 
-    const changeHarFileFolder = (fileName, folderName) => {
+    const changeHarFileFolder = async (fileName, folderName) => {
+        const token = await authService.getAccessToken();
         fetch("api/harfile/changeFileFolder", {
             method: "POST",
             headers: {
                 'Accept': 'application/json; charset=utf-8',
-                'Content-Type': 'application/json;charset=UTF-8'
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Authorization': `Bearer ${token}` 
             },
             body: JSON.stringify({
                 name: fileName.trim(),
@@ -155,14 +165,18 @@ const HttpArchive = () => {
         return "k-i-cancel";
     };
 
-    const onItemClick = (event) => {
+    const onItemClick = async (event) => {
+        const token = await authService.getAccessToken();
         let fileName = event.item.text;
         if (fileName.toLowerCase().endsWith(".har")) {
-            fetch(`api/harfile/GetHarFileContent/${fileName}`)
+            fetch(`api/harfile/GetHarFileContent/${fileName}`, {
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+            })
                 .then(res => res.json())
                 .then(
-                    (result) => {
-                        setFileData(result);
+                    (res) => {
+                        setFileData(JSON.parse(res.content));
+                        setPreviewDescription(res.description);
                     },
                 );
             return;
@@ -186,7 +200,7 @@ const HttpArchive = () => {
         );
     };
 
-    const onItemDragEnd = (event) => {
+    const onItemDragEnd = async (event) => {
         if (!event.item.text.toLowerCase().endsWith(".har")) {
             isDragDrop.current = dragOverCnt.current > 0;
             dragOverCnt.current = 0;
@@ -205,7 +219,7 @@ const HttpArchive = () => {
                 eventAnalyzer.destinationMeta.itemHierarchicalIndex
             );
             setTree(updatedTree);
-            changeHarFileFolder(event.item.text, getItemNameByIndex(eventAnalyzer.destinationMeta.itemHierarchicalIndex, tree));
+            await changeHarFileFolder(event.item.text, getItemNameByIndex(eventAnalyzer.destinationMeta.itemHierarchicalIndex, tree));
         }
     };
 
@@ -233,15 +247,25 @@ const HttpArchive = () => {
             toast.error("Select folder please.");
             return;
         }
+        if (fileName.trim().length > 100) {
+            toast.error("File Name should be under 100 symbols.");
+            return;
+        }
+        if (fileDescription.trim().length > 500) {
+            toast.error("Description Name should be under 500 symbols.");
+            return;
+        }
         let fileData = await getHarFileData(e);
         if (!fileData) {
             return;
         }
+        const token = await authService.getAccessToken();
         fetch("api/harfile/create", {
             method: "POST",
             headers: {
                 'Accept': 'application/json; charset=utf-8',
-                'Content-Type': 'application/json;charset=UTF-8'
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
                 name: fileName.toLocaleLowerCase().endsWith(".har") ? fileName.trim() : fileName.trim() + ".har",
@@ -249,13 +273,13 @@ const HttpArchive = () => {
                 description: fileDescription,
                 folderName: selectedFolder
             })
-        }).catch(() => {
-            toast.error("Error while creating har file");
         }).then(res => res.json())
             .then((res) => {
                 document.getElementById("saveHar").reset();
                 toast.success("Successfully saved HAR file");
                 addFileToCorrectFolder(res.name, res.folderName, tree);
+            }).catch(() => {
+                toast.error("Error while saving Har file");
             });
     }
 
@@ -301,8 +325,12 @@ const HttpArchive = () => {
                         <input type="submit" className="btn btn-primary" form="saveHar" value="Save"></input>
                     </div>
                 </div>
-                <hr />
                 <h1 className="previewer">Previewer</h1>
+                <hr />
+                <div className="description">
+                <h2 >Description: </h2>
+                <h5>{previewDescription}</h5>
+                </div>
             </Container>
             <NetworkViewer data={fileData} />
         </div>

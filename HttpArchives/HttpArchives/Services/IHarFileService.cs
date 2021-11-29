@@ -1,4 +1,5 @@
-﻿using HttpArchives.ViewModels;
+﻿using HttpArchives.Models;
+using HttpArchives.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,7 +11,7 @@ namespace HttpArchives.Services
 
         IEnumerable<HarFileModel> GetAllHarFiles();
 
-        string GetHarFileContent(string fileName);
+        HarFileModel GetHarFileContent(string fileName);
 
         Task ChangeHarFileFolderNameAsync(string fileName, string newFolderName);
     }
