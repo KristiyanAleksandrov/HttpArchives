@@ -1,18 +1,28 @@
 const treeData = [
     {
-        text: "Furniture",
+        text: "Wikipedia",
         items: [
             {
-                text: "My Folder",
-            },
-            {
-                text: "Sofas",
-            },
-            {
-                text: "Occasional Furniture",
+                text: "Animals",
                 items: [
                     {
-                        text: "Test Folder",
+                        text: "Dog Breeds",
+                    },
+                ]
+            },
+            {
+                text: "Other Things",
+                items: [
+                    {
+                        text: "GitHub",
+                        items: [
+                            {
+                                text: "Commits",
+                            },
+                        ]
+                    },
+                    {
+                        text: "BitBucket",
                     },
                 ]
                 
@@ -20,16 +30,16 @@ const treeData = [
         ],
     },
     {
-        text: "Decor",
+        text: "Progress",
         items: [
             {
-                text: "Bed Linen",
+                text: "Fiddler",
             },
-        ],
+        ]
     },
     {
-        text: "Wikipedia",
-    },
+        text: "Random Sites"
+    }
 ];
 
 export default treeData;

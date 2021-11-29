@@ -207,10 +207,23 @@ const HttpArchive = () => {
             dragClue.current.hide();
             return;
         }
+        if (!event.item.text.toLowerCase().endsWith(".har")) {
+            isDragDrop.current = dragOverCnt.current > 0;
+            dragOverCnt.current = 0;
+            dragClue.current.hide();
+            return;
+        }
         isDragDrop.current = dragOverCnt.current > 0;
         dragOverCnt.current = 0;
         dragClue.current.hide();
         const eventAnalyzer = new TreeViewDragAnalyzer(event).init();
+        let itemName = getItemNameByIndex(eventAnalyzer.destinationMeta.itemHierarchicalIndex, tree);
+        if (itemName.toLowerCase().endsWith(".har")) {
+            isDragDrop.current = dragOverCnt.current > 0;
+            dragOverCnt.current = 0;
+            dragClue.current.hide();
+            return;
+        }
         if (eventAnalyzer.isDropAllowed) {
             const updatedTree = moveTreeViewItem(
                 event.itemHierarchicalIndex,
@@ -219,7 +232,7 @@ const HttpArchive = () => {
                 eventAnalyzer.destinationMeta.itemHierarchicalIndex
             );
             setTree(updatedTree);
-            await changeHarFileFolder(event.item.text, getItemNameByIndex(eventAnalyzer.destinationMeta.itemHierarchicalIndex, tree));
+            await changeHarFileFolder(event.item.text, itemName);
         }
     };
 
